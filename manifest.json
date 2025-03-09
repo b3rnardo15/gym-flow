@@ -61,7 +61,6 @@
     "sports"
   ],
   
-  // Campos Opcionais
   "text_direction": "ltr",  
   "iarc_rating_id": "12345", 
   "lang": "pt-BR", 
