@@ -2,7 +2,7 @@
 
 ## Descrição
 
-O **Treinamento App** é um projeto simples para registrar e acompanhar seus treinos. Você pode adicionar exercícios, organizar por categoria (peito, ombro, perna, etc.) e visualizar seu desempenho com gráficos. Os dados são armazenados no navegador usando `localStorage`, o que garante que suas informações sejam salvas.
+O **Gym Flow** é um projeto simples para registrar e acompanhar seus treinos. Você pode adicionar exercícios, organizar por categoria (peito, ombro, perna, etc.) e visualizar seu desempenho com gráficos. Os dados são armazenados no navegador usando `localStorage`, o que garante que suas informações sejam salvas.
 
 ## Funcionalidades
 
