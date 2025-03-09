@@ -6,6 +6,24 @@
   "background_color": "#265ca2",
   "start_url": "/index.html",
   "display": "standalone",
+  "id": "/gym-flow",
+  "launch_handler": {
+    "action": "navigate",
+    "url": "/home"
+  },
+  "orientation": "portrait",
+  "screenshots": [
+    {
+      "src": "screenshots/screen1.png",
+      "sizes": "320x240",
+      "type": "image/png"
+    },
+    {
+      "src": "screenshots/screen2.png",
+      "sizes": "640x480",
+      "type": "image/png"
+    }
+  ],
   "icons": [
     {
       "src": "icons/android-launchericon-48-48.png",
@@ -41,5 +59,27 @@
   "categories": [
     "fitness",
     "sports"
+  ],
+  
+  // Campos Opcionais
+  "text_direction": "ltr",  
+  "iarc_rating_id": "12345", 
+  "lang": "pt-BR", 
+  
+  "prefer_related_applications": true,  
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://www.gymflow.com"
+    },
+    {
+      "platform": "android",
+      "url": "https://play.google.com/store/apps/details?id=com.gymflow"
+    }
+  ],  
+  "scope": "/home",  
+  "scope_extensions": [  
+    "/dashboard",
+    "/profile"
   ]
 }
