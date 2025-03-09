@@ -529,6 +529,27 @@ function adicionarGraficoProgresso() {
         }
     });
 }
+if ('Notification' in window && 'serviceWorker' in navigator) {
+  // Solicitar permissão para notificações
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      console.log('Permissão para notificações concedida!');
+      // Inscrever-se para notificações push
+      navigator.serviceWorker.ready.then(registration => {
+        return registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: '<SUA_CHAVE_VAPID>'
+        });
+      }).then(subscription => {
+        console.log('Usuário inscrito para notificações push', subscription);
+      });
+    } else {
+      console.log('Permissão para notificações negada');
+    }
+  });
+}
+
+
 
 function processarDadosProgresso(datas) {
     // Ordenar datas
