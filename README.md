@@ -20,15 +20,14 @@ O **Gym-Flow** é um aplicativo para registrar e acompanhar seus treinos. Com el
 
 1. Clone este repositório:
 
-   \`\`\`bash
+
    git clone https://github.com/b3rnardo15/gym-flow.git
-   \`\`\`
+
 
 2. Navegue até a pasta do projeto:
 
-   \`\`\`bash
    cd Gym-Flow
-   \`\`\`
+
 
 3. Abra o arquivo \`index.html\` no seu navegador.
 
