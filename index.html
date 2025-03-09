@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="fotos/logoRed.png" type="fotos/logoRed">
+    <link rel="icon" href="fotos/logoRed.png" type="image/png"> 
     <title>Gym Flow</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -17,19 +17,19 @@
 
     <div class="container mt-5">
         <section class="intro">
-            <h2>Transforme seu treino com Gym Flow!  </h2>
+            <h2>Transforme seu treino com Gym Flow!</h2>
             <p>Os treinos que eu não falho durante a semana (confia)</p>
         </section>
 
         <section class="actions mb-4">
-            <!-- Botões para navegacao entre as pag do app -->
+            <!-- Botões para navegação entre as páginas do app -->
             <button class="btn btn-primary" onclick="window.location.href='./treino.html'">Adicionar Treino</button>
             <button class="btn btn-secondary" onclick="window.location.href='desempenho.html'">Ver Desempenho</button>
         </section>
 
         <section class="treinos">
             <h3>Meus Treinos</h3>
-            <!-- Aq seraoo inseridos os cards dos treinos -->
+            <!-- Aqui serão inseridos os cards dos treinos -->
             <div class="row" id="cardsTreinos"></div>
         </section>
     </div>
@@ -39,5 +39,27 @@
     </footer>
 
     <script src="script.js"></script>
+
+    <!-- Registrar o Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registrado com sucesso:', registration);
+                })
+                .catch(error => {
+                    console.log('Falha ao registrar o Service Worker:', error);
+                });
+
+            // Solicitar permissão para notificações push
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log('Permissão para notificações concedida!');
+                } else {
+                    console.log('Permissão para notificações negada');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
