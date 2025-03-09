@@ -349,7 +349,7 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="select"]:focus
 .category-icon {
     width: 300px; 
     height: 250px; 
-    object-fit: contain; 
+    object-fit: cover; 
     margin-right: 30px; 
 }
 
