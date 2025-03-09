@@ -28,8 +28,8 @@ O **Gym Flow** é um projeto simples para registrar e acompanhar seus treinos. V
 
 2. Navegue até a pasta do projeto:
 
+'''bash
 cd Gym-Flow
-Abra o arquivo index.html no seu navegador.
 
 3. Abra o arquivo index.html no seu navegador.
 
