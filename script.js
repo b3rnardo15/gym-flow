@@ -8,8 +8,6 @@ let conquistas = JSON.parse(localStorage.getItem('conquistas')) || {
     trintaDiasSeguidos: false,
     carregamentoPesado: false
 };
-let timerInterval;
-let tempoRestante = 0;
 let modoEscuro = localStorage.getItem('modoEscuro') === 'true';
 
 // Ícones para categorias de exercícios
@@ -55,27 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('salvarTreino').addEventListener('click', salvarTreino);
         carregarExerciciosSalvos();
         
-        // Adicionar timer de descanso
-        const timerContainer = document.createElement('div');
-        timerContainer.className = 'rest-timer mb-4';
-        timerContainer.innerHTML = `
-            <h3>Timer de Descanso</h3>
-            <div class="timer-display" id="timerDisplay">00:00</div>
-            <div class="timer-controls">
-                <button class="btn btn-outline-primary" onclick="iniciarTimer(30)">30s</button>
-                <button class="btn btn-outline-primary" onclick="iniciarTimer(60)">1m</button>
-                <button class="btn btn-outline-primary" onclick="iniciarTimer(90)">1m30s</button>
-                <button class="btn btn-outline-primary" onclick="iniciarTimer(120)">2m</button>
-                <button class="btn btn-danger" onclick="pararTimer()">Parar</button>
-            </div>`;
-        
-        // Inserir timer após o formulário
-        const form = document.getElementById('treinoForm');
-        form.parentNode.insertBefore(timerContainer, form.nextSibling);
-    } else if (currentPath.includes('desempenho.html')) {
-        renderizarGrafico();
-        renderizarHistorico();
-        renderizarConquistas();
         
         // Adicionar botões de importar/exportar
         const container = document.querySelector('.container');
@@ -326,49 +303,6 @@ function salvarTreino() {
     
     alert("Treino salvo com sucesso!");
     window.location.href = 'index.html';
-}
-
-// ====== Funções de Timer ======
-function iniciarTimer(segundos) {
-    // Parar timer anterior se existir
-    pararTimer();
-    
-    tempoRestante = segundos;
-    atualizarDisplayTimer();
-    
-    // Iniciar contador
-    timerInterval = setInterval(() => {
-        tempoRestante--;
-        atualizarDisplayTimer();
-        
-        if (tempoRestante <= 0) {
-            pararTimer();
-            notificarFimTimer();
-        }
-    }, 1000);
-}
-
-function pararTimer() {
-    clearInterval(timerInterval);
-}
-
-function atualizarDisplayTimer() {
-    const minutos = Math.floor(tempoRestante / 60);
-    const segundos = tempoRestante % 60;
-    
-    const display = document.getElementById('timerDisplay');
-    if (display) {
-        display.textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
-    }
-}
-
-function notificarFimTimer() {
-    // Tocar som de alarme (opcional)
-    const audio = new Audio('./sounds/beep.mp3');
-    audio.play().catch(e => console.log('Erro ao tocar som:', e));
-    
-    // Notificação visual
-    alert('Tempo de descanso finalizado!');
 }
 
 // ====== Funções de Gráfico e Análise ======
