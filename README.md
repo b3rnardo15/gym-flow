@@ -23,7 +23,7 @@ O **Treinamento App** é um projeto simples para registrar e acompanhar seus tre
 1. Clone este repositório:
 
    ```bash
-   git clone https://github.com/b3rnardo15/Gym-Flow.git
+   git clone https://github.com/b3rnardo15/gym-flow.git
 
 
 2. Navegue até a pasta do projeto:
