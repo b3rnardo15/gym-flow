@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desempenho</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1 id="tituloApp">Desempenho de Treino</h1>
+    </header>
+
+    <div class="container">
+        <section class="intro">
+            <h2>Estou treinando fofo?</h2>
+            
+            <div class="controls">
+                <div class="filter-group">
+                    <label for="periodoFiltro">Período:</label>
+                    <select id="periodoFiltro" onchange="atualizarGraficos()">
+                        <option value="7">Última semana</option>
+                        <option value="30" selected>Último mês</option>
+                        <option value="90">Último trimestre</option>
+                        <option value="0">Todo histórico</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="tipoGrafico">Visualização:</label>
+                    <select id="tipoGrafico" onchange="atualizarGraficos()">
+                        <option value="bar" selected>Barras</option>
+                        <option value="line">Linha</option>
+                        <option value="radar">Radar</option>
+                        <option value="polarArea">Área Polar</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="graficoExercicios"></canvas>
+            </div>
+            
+            <div class="stats-container">
+                <h3>Estatísticas Gerais</h3>
+                <div id="estatisticasGerais" class="stats-grid">
+                    <!-- Estatísticas serão inseridas via JavaScript -->
+                </div>
+            </div>
+            
+            <div class="progresso-container">
+                <h3>Evolução de Carga</h3>
+                <div class="chart-container">
+                    <canvas id="graficoProgressao"></canvas>
+                </div>
+            </div>
+            
+            <div class="recordes-container">
+                <h3>Seus Recordes</h3>
+                <div id="listaRecordes" class="recordes-list">
+                    <!-- Recordes serão inseridos via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <div class="actions">
+            <button id="btnExportar" onclick="exportarDados()">Exportar Dados</button>
+            <button id="btnVoltar" onclick="window.location.href='index.html'">Voltar para a Página Inicial</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 App de Treinos - Todos os direitos reservados b3rnardo_15.</p>
+    </footer>
+
+    <script>
+        let graficoDesempenho;
+        let graficoProgressao;
+        
+        // Função para filtrar exercícios por período
+        function filtrarExerciciosPorPeriodo(exercicios, dias) {
+            if (dias === 0) return exercicios;
+            
+            const dataLimite = new Date();
+            dataLimite.setDate(dataLimite.getDate() - dias);
+            
+            return exercicios.filter(exercicio => {
+                const dataExercicio = new Date(exercicio.data || Date.now());
+                return dataExercicio >= dataLimite;
+            });
+        }
+        
+        // Função para calcular estatísticas
+        function calcularEstatisticas(exercicios) {
+            const stats = {
+                totalSeries: 0,
+                totalCarga: 0,
+                totalRepeticoes: 0,
+                mediaRepeticoes: 0,
+                mediaCarga: 0,
+                categorias: {},
+                recordeCarga: { valor: 0, exercicio: '' },
+                recordeRepeticoes: { valor: 0, exercicio: '' }
+            };
+            
+            exercicios.forEach(exercicio => {
+                const series = parseInt(exercicio.series) || 0;
+                const carga = parseInt(exercicio.carga) || 0;
+                const repeticoes = parseInt(exercicio.repeticoes) || 0;
+                
+                stats.totalSeries += series;
+                stats.totalCarga += carga;
+                stats.totalRepeticoes += repeticoes;
+                
+                // Estatísticas por categoria
+                if (!stats.categorias[exercicio.categoria]) {
+                    stats.categorias[exercicio.categoria] = {
+                        series: 0,
+                        carga: 0,
+                        repeticoes: 0,
+                        exercicios: 0
+                    };
+                }
+                
+                stats.categorias[exercicio.categoria].series += series;
+                stats.categorias[exercicio.categoria].carga += carga;
+                stats.categorias[exercicio.categoria].repeticoes += repeticoes;
+                stats.categorias[exercicio.categoria].exercicios += 1;
+                
+                // Verificar recordes
+                if (carga > stats.recordeCarga.valor) {
+                    stats.recordeCarga = { 
+                        valor: carga, 
+                        exercicio: exercicio.nome, 
+                        data: exercicio.data 
+                    };
+                }
+                
+                if (repeticoes > stats.recordeRepeticoes.valor) {
+                    stats.recordeRepeticoes = { 
+                        valor: repeticoes, 
+                        exercicio: exercicio.nome, 
+                        data: exercicio.data 
+                    };
+                }
+            });
+            
+            // Calcular médias
+            const totalExercicios = exercicios.length;
+            if (totalExercicios > 0) {
+                stats.mediaCarga = Math.round(stats.totalCarga / totalExercicios);
+                stats.mediaRepeticoes = Math.round(stats.totalRepeticoes / totalExercicios);
+            }
+            
+            return stats;
+        }
+        
+        // Função para agrupar exercícios por data para mostrar progressão
+        function agruparExerciciosPorData(exercicios) {
+            const dadosPorData = {};
+            
+            exercicios.forEach(exercicio => {
+                const data = exercicio.data || 'Sem data';
+                if (!dadosPorData[data]) {
+                    dadosPorData[data] = {
+                        cargaTotal: 0,
+                        repeticoesTotal: 0
+                    };
+                }
+                
+                dadosPorData[data].cargaTotal += parseInt(exercicio.carga) || 0;
+                dadosPorData[data].repeticoesTotal += parseInt(exercicio.repeticoes) || 0;
+            });
+            
+            // Converter para array e ordenar por data
+            return Object.entries(dadosPorData)
+                .map(([data, valores]) => ({ data, ...valores }))
+                .sort((a, b) => new Date(a.data) - new Date(b.data));
+        }
+        
+        // Função para renderizar gráfico de desempenho
+        function renderizarGraficoDesempenho(exercicios, tipoGrafico) {
+            const ctx = document.getElementById('graficoExercicios').getContext('2d');
+            
+            const labels = [];  // Categorias dos exercícios
+            const dataSeries = [];  
+            const dataCarga = [];  
+            const dataRepeticoes = [];
+            
+            // Agrupar dados por categoria
+            exercicios.forEach(exercicio => {
+                if (!labels.includes(exercicio.categoria)) {
+                    labels.push(exercicio.categoria);
+                    dataSeries.push(0);
+                    dataCarga.push(0);
+                    dataRepeticoes.push(0);
+                }
+                
+                const index = labels.indexOf(exercicio.categoria);
+                dataSeries[index] += parseInt(exercicio.series) || 0;
+                dataCarga[index] += parseInt(exercicio.carga) || 0;
+                dataRepeticoes[index] += parseInt(exercicio.repeticoes) || 0;
+            });
+            
+            // Configurações específicas para cada tipo de gráfico
+            const configuracoes = {
+                radar: {
+                    scales: undefined,
+                    elements: {
+                        line: { borderWidth: 3 }
+                    }
+                },
+                polarArea: {
+                    scales: undefined
+                },
+                line: {
+                    scales: { y: { beginAtZero: true } }
+                },
+                bar: {
+                    scales: { y: { beginAtZero: true } }
+                }
+            };
+            
+            // Destruir gráfico anterior se existir
+            if (graficoDesempenho) {
+                graficoDesempenho.destroy();
+            }
+            
+            // Criar novo gráfico
+            graficoDesempenho = new Chart(ctx, {
+                type: tipoGrafico,
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total de Séries',
+                            data: dataSeries,
+                            backgroundColor: 'rgba(40, 167, 69, 0.5)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Carga Total (kg)',
+                            data: dataCarga,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total de Repetições',
+                            data: dataRepeticoes,
+                            backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    scales: configuracoes[tipoGrafico].scales,
+                    elements: configuracoes[tipoGrafico].elements,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Desempenho por Categoria',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    const datasetIndex = context.datasetIndex;
+                                    
+                                    if (datasetIndex === 1) { // Carga
+                                        const mediaPorExercicio = dataCarga[index] / dataSeries[index];
+                                        return `Média por série: ${mediaPorExercicio.toFixed(1)} kg`;
+                                    } else if (datasetIndex === 2) { // Repetições
+                                        const mediaPorSerie = dataRepeticoes[index] / dataSeries[index];
+                                        return `Média por série: ${mediaPorSerie.toFixed(1)} reps`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Função para renderizar gráfico de progressão
+        function renderizarGraficoProgressao(exercicios) {
+            const ctx = document.getElementById('graficoProgressao').getContext('2d');
+            
+            // Agrupar dados por data
+            const dadosAgrupados = agruparExerciciosPorData(exercicios);
+            
+            // Preparar dados para o gráfico
+            const labels = dadosAgrupados.map(item => {
+                // Formatar data para exibição
+                return item.data === 'Sem data' ? item.data : 
+                    moment(new Date(item.data)).format('DD/MM');
+            });
+            
+            const dataCarga = dadosAgrupados.map(item => item.cargaTotal);
+            const dataRepeticoes = dadosAgrupados.map(item => item.repeticoesTotal);
+            
+            // Destruir gráfico anterior se existir
+            if (graficoProgressao) {
+                graficoProgressao.destroy();
+            }
+            
+            // Criar novo gráfico
+            graficoProgressao = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Carga Total (kg)',
+                            data: dataCarga,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Repetições Totais',
+                            data: dataRepeticoes,
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Carga (kg)'
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Repetições'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolução ao Longo do Tempo',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Função para exibir estatísticas gerais
+        function exibirEstatisticas(stats) {
+            const container = document.getElementById('estatisticasGerais');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalSeries}</div>
+                    <div class="stat-label">Total de Séries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalCarga}</div>
+                    <div class="stat-label">Carga Total (kg)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalRepeticoes}</div>
+                    <div class="stat-label">Total de Repetições</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.mediaCarga}</div>
+                    <div class="stat-label">Média de Carga</div>
+                </div>
+            `;
+        }
+        
+        // Função para exibir recordes
+        function exibirRecordes(stats) {
+            const container = document.getElementById('listaRecordes');
+            
+            if (stats.recordeCarga.valor === 0 && stats.recordeRepeticoes.valor === 0) {
+                container.innerHTML = '<p class="sem-recordes">Nenhum recorde ainda. Continue treinando!</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            if (stats.recordeCarga.valor > 0) {
+                const dataFormatada = stats.recordeCarga.data ? 
+                    moment(new Date(stats.recordeCarga.data)).format('DD/MM/YYYY') : 'Data não registrada';
+                
+                html += `
+                    <div class="recorde-item">
+                        <div class="recorde-titulo">Recorde de Carga</div>
+                        <div class="recorde-valor">${stats.recordeCarga.valor} kg</div>
+                        <div class="recorde-detalhe">Exercício: ${stats.recordeCarga.exercicio}</div>
+                        <div class="recorde-data">${dataFormatada}</div>
+                    </div>
+                `;
+            }
+            
+            if (stats.recordeRepeticoes.valor > 0) {
+                const dataFormatada = stats.recordeRepeticoes.data ? 
+                    moment(new Date(stats.recordeRepeticoes.data)).format('DD/MM/YYYY') : 'Data não registrada';
+                
+                html += `
+                    <div class="recorde-item">
+                        <div class="recorde-titulo">Recorde de Repetições</div>
+                        <div class="recorde-valor">${stats.recordeRepeticoes.valor} reps</div>
+                        <div class="recorde-detalhe">Exercício: ${stats.recordeRepeticoes.exercicio}</div>
+                        <div class="recorde-data">${dataFormatada}</div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Função para atualizar todos os gráficos e estatísticas
+        function atualizarGraficos() {
+            try {
+                const periodoFiltro = parseInt(document.getElementById('periodoFiltro').value);
+                const tipoGrafico = document.getElementById('tipoGrafico').value;
+                
+                // Carregar dados
+                let exercicios = JSON.parse(localStorage.getItem('exercicios')) || [];
+                
+                // Adicionar data se não existir (para compatibilidade)
+                exercicios = exercicios.map(ex => {
+                    if (!ex.data) ex.data = new Date().toISOString().split('T')[0];
+                    return ex;
+                });
+                
+                // Filtrar por período
+                const exerciciosFiltrados = filtrarExerciciosPorPeriodo(exercicios, periodoFiltro);
+                
+                // Calcular estatísticas
+                const estatisticas = calcularEstatisticas(exerciciosFiltrados);
+                
+                // Renderizar gráficos e estatísticas
+                renderizarGraficoDesempenho(exerciciosFiltrados, tipoGrafico);
+                renderizarGraficoProgressao(exerciciosFiltrados);
+                exibirEstatisticas(estatisticas);
+                exibirRecordes(estatisticas);
+                
+            } catch (erro) {
+                console.error('Erro ao atualizar gráficos:', erro);
+                alert('Ocorreu um erro ao carregar os dados. Por favor, tente novamente.');
+            }
+        }
+        
+        // Função para exportar dados para JSON
+        function exportarDados() {
+            try {
+                const exercicios = JSON.parse(localStorage.getItem('exercicios')) || [];
+                const dataStr = JSON.stringify(exercicios, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const linkExportar = document.createElement('a');
+                linkExportar.setAttribute('href', dataUri);
+                linkExportar.setAttribute('download', 'meus_treinos.json');
+                document.body.appendChild(linkExportar);
+                linkExportar.click();
+                document.body.removeChild(linkExportar);
+                
+            } catch (erro) {
+                console.error('Erro ao exportar dados:', erro);
+                alert('Ocorreu um erro ao exportar os dados.');
+            }
+        }
+        
+        // Carregar o gráfico ao abrir a página
+        window.addEventListener('load', () => {
+            if (window.location.pathname.includes('desempenho.html')) {
+                atualizarGraficos();
+            }
+        });
+    </script>
+</body>
+</html>

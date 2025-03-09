@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="fotos/logoRed.png" type="fotos/logoRed">
+    <title>Gym Flow</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css"> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1 id="tituloApp">Gym Flow</h1>
+    </header>
+
+    <div class="container mt-5">
+        <section class="intro">
+            <h2>Transforme seu treino com Gym Flow!  </h2>
+            <p>Os treinos que eu não falho durante a semana (confia)</p>
+        </section>
+
+        <section class="actions mb-4">
+            <!-- Botões para navegacao entre as pag do app -->
+            <button class="btn btn-primary" onclick="window.location.href='./treino.html'">Adicionar Treino</button>
+            <button class="btn btn-secondary" onclick="window.location.href='desempenho.html'">Ver Desempenho</button>
+        </section>
+
+        <section class="treinos">
+            <h3>Meus Treinos</h3>
+            <!-- Aq seraoo inseridos os cards dos treinos -->
+            <div class="row" id="cardsTreinos"></div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 App de Treinos - Todos os direitos reservados b3rnardo_15.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
