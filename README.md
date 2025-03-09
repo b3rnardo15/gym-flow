@@ -2,7 +2,7 @@
 
 ## Descrição
 
-O **Gym Flow** é um projeto simples para registrar e acompanhar seus treinos. Você pode adicionar exercícios, organizar por categoria (peito, ombro, perna, etc.) e visualizar seu desempenho com gráficos. Os dados são armazenados no navegador usando `localStorage`, o que garante que suas informações sejam salvas.
+O **Gym-Flow** é um aplicativo para registrar e acompanhar seus treinos. Com ele, você pode adicionar exercícios, organizá-los por categorias (como peito, ombro, perna, etc.) e visualizar seu desempenho através de gráficos. As informações dos treinos são armazenadas localmente no navegador, garantindo que os dados sejam preservados.
 
 ## Funcionalidades
 
@@ -25,12 +25,10 @@ O **Gym Flow** é um projeto simples para registrar e acompanhar seus treinos. V
    ```bash
    git clone https://github.com/b3rnardo15/gym-flow.git
 
-
 2. Navegue até a pasta do projeto:
 
-'''bash
-cd Gym-Flow
-
+  cd Gym-Flow
+  
 3. Abra o arquivo index.html no seu navegador.
 
 4. O aplicativo estará pronto para uso!
